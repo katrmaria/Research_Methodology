@@ -4,6 +4,8 @@ The following notebooks implement different approaches for early detection of an
 
 ## Tran_methodology.ipynb (Baseline)
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2j8_W0sJJlRBLsPECPZ2b-EqCgrZvam?usp=sharing)
+
 As a baseline, `Tran_methodology.ipynb` includes all the functions from `EXP-23-BZ3167.ipynb` for:
 - Processing Omnipose segmentation masks and computing bacterial areas
 - Fitting a rolling-window exponential model *A(t) = a·e^(bt)* to extract growth rates
@@ -18,6 +20,8 @@ The figure shows the normalized growth rate of treated versus untreated conditio
 
 ## Finetuning_Sam_experiments.ipynb
 
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ZZ2NPX5iHTRP6cnBVBNm_N9xf8fH032x?usp=sharing)
+
 The initial research question focused on whether **improving cell segmentation** could reduce noise in area-based growth measurements and, as a result, enable earlier detection of antibiotic effects.
 
 For this purpose, the **general SAM model** is fine-tuned using LoRA with different configurations. The dataset is split into train, validation, and test sets. The best configuration was **LoRA rank 32**, achieving Dice = 0.9275, IoU = 0.8649, Precision = 0.9113, Recall = 0.9443, F1 = 0.9275.
@@ -25,6 +29,8 @@ For this purpose, the **general SAM model** is fine-tuned using LoRA with differ
 However, the fine-tuned model must be evaluated on an unseen test dataset to generate figures and compute the detection time, allowing comparison with the baseline Omnipose model.
 
 ## Heterogeneity_analysis.ipynb
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1HLfq0pOjPSCWUN7Q2OXvBF97lKkHtnoc?usp=sharing)
 
 Since fine-tuning a model using masks from another model as ground truth is not scientifically correct, an alternative approach was explored, analyzing **heterogeneity**. Some cells may continue growing rapidly while others slow down or stop.
 
@@ -35,6 +41,10 @@ Each chamber (both reference and treated) is divided into 3 horizontal patches, 
 The results in the figure are not very clear as the dataset used does not exhibit strong heterogeneity. However, visual inspection added in the notebook shows that the algorithm finds logical regions that appear to grow faster than the other patches.
 
 ## Early_detection_Sam2.ipynb
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oVrnIiyG9pM2qB_8aTZ564i5DaDEzdGT?usp=sharing)
+
+**Note**: This notebook is too large to be displayed on GitHub. Please use the Colab link above to view it.
 
 Another approach was to use a model suitable for video tracking with inference only (no training on the dataset). **SAM2** is used for segmentation and mask propagation, where each cell is given an initial mask and SAM2 propagates it across all frames. From these masks, single-cell area curves and growth rates are computed.
 

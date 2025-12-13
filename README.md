@@ -31,7 +31,7 @@ torch
 ```
 
 **How to run:**
-This notebook is a recreation of the baseline figures. It was run on a GPU T4 runtime but can also be run locally. Replace the paths `ref_dir` and `treat_dir` with the location of your data folders, then run all cells sequentially.
+This notebook is a recreation of the baseline figures. There is no need for GPU, it can be run locally. Replace the paths of the masks `ref_dir` and `treat_dir` with the location of your data folders (REF_masks101_110 and RIF10_masks201_210), then run all cells sequentially.
 
 **Description:**
 
@@ -67,7 +67,7 @@ loralib
 ```
 
 **How to run:**
-This notebook was run on a GPU T4 runtime and requires GPU for training. Everything is mounted on Google Drive, so model weights will be saved there. Run the code sequentially to set up the appropriate formats for the dataset, the model, and the training/evaluation functions. The experimentation starts in the "Experiments" section where you can run the examples or change the configurations (e.g., `exp_name`, `batch_size`, `num_epochs`, `learning_rate`, `lora_rank`, etc.). For any changes, make sure to update the paths accordingly.
+This notebook was run on a GPU T4 runtime and requires GPU for training. Everything is mounted on Google Drive, so model weights will be saved there. Replace the paths for raw images and masks (`ref_raw`, `ref_mask`, `rif_raw`, `rif_mask`) with the location of your data folders (REF_raw_data101_110, REF_masks101_110, RIF10_raw_data201_210, RIF10_masks201_210). Run the code sequentially to set up the appropriate formats for the dataset, the model, and the training/evaluation functions. The experimentation starts in the "Experiments" section where you can run the examples or change the configurations (e.g., `exp_name`, `batch_size`, `num_epochs`, `learning_rate`, `lora_rank`, etc.). For any changes, make sure to update the paths accordingly.
 
 **Description:**
 
@@ -93,7 +93,7 @@ Pillow
 ```
 
 **How to run:**
-This notebook was run on a GPU T4 runtime but can also be run locally. There is an example demonstrating how the approach works on one chamber, and then the method is extended to all chambers in the "Actual Analysis" section. Make sure that the paths for `ref_dir` and `treat_dir` are correct, then run all cells sequentially.
+There is no need for GPU, it can be run locally. There is an example demonstrating how the approach works on one chamber, and then the method is extended to all chambers in the "Actual Analysis" section. Make sure that the paths of the masks `ref_dir` and `treat_dir` are correct (REF_masks101_110 and RIF10_masks201_210), then run all cells sequentially.
 
 **Description:**
 
@@ -127,7 +127,7 @@ sam2 (git+https://github.com/facebookresearch/sam2.git)
 The notebook also downloads the SAM2 checkpoint (`sam2.1_hiera_large.pt`) automatically.
 
 **How to run:**
-This notebook was run on a GPU T4 runtime and requires GPU. There are examples demonstrating how the method works on a single chamber, followed by the full analysis on all positions in the "All Positions Analysis" section. Unfortunately, to run the analysis you need to change the `tiff_dir` folder path for each chamber manually. The results for all different positions are saved as CSV files in a Google Drive folder defined by `BASE_DIR` (e.g., `/content/drive/MyDrive/POSITION_RESULTS`). These CSV files are required for computing the evaluation metrics in Method 1 and Method 2. Be careful with how these paths are used and where you want to save the results.
+This notebook was run on a GPU T4 runtime and requires GPU. There are examples demonstrating how the method works on a single chamber, followed by the full analysis on all positions in the "All Positions Analysis" section. Unfortunately, to run the analysis you need to change the `tiff_dir` folder path for each chamber manually (e.g., `tiff_dir = "/content/drive/MyDrive/REF_raw_data101_110/Pos101/aphase"`). The results for all different positions are saved as CSV files in a Google Drive folder defined by `BASE_DIR` (e.g., `/content/drive/MyDrive/POSITION_RESULTS`). These CSV files are required for computing the evaluation metrics in Method 1 and Method 2. Be careful with how these paths are used and where you want to save the results.
 
 **Description:**
 

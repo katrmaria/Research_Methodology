@@ -33,6 +33,7 @@ torch
 **How to run:**
 This notebook is a recreation of the baseline figures. It was run on a GPU T4 runtime but can also be run locally. Replace the paths `ref_dir` and `treat_dir` with the location of your data folders, then run all cells sequentially.
 
+**Description:**
 As a baseline, `Tran_methodology.ipynb` includes all the functions from `EXP-23-BZ3167.ipynb` for:
 - Processing Omnipose segmentation masks and computing bacterial areas
 - Fitting a rolling-window exponential model *A(t) = a·e^(bt)* to extract growth rates
@@ -67,6 +68,7 @@ loralib
 **How to run:**
 This notebook was run on a GPU T4 runtime and requires GPU for training. Everything is mounted on Google Drive, so model weights will be saved there. Run the code sequentially to set up the appropriate formats for the dataset, the model, and the training/evaluation functions. The experimentation starts in the "Experiments" section where you can run the examples or change the configurations (e.g., `exp_name`, `batch_size`, `num_epochs`, `learning_rate`, `lora_rank`, etc.). For any changes, make sure to update the paths accordingly.
 
+**Description:**
 The initial research question focused on whether **improving cell segmentation** could reduce noise in area-based growth measurements and, as a result, enable earlier detection of antibiotic effects.
 
 For this purpose, the **general SAM model** is fine-tuned using LoRA with different configurations. The dataset is split into train, validation, and test sets. The best configuration was **LoRA rank 32**, achieving Dice = 0.9275, IoU = 0.8649, Precision = 0.9113, Recall = 0.9443, F1 = 0.9275.
@@ -91,6 +93,7 @@ Pillow
 **How to run:**
 This notebook was run on a GPU T4 runtime but can also be run locally. There is an example demonstrating how the approach works on one chamber, and then the method is extended to all chambers in the "Actual Analysis" section. Make sure that the paths for `ref_dir` and `treat_dir` are correct, then run all cells sequentially.
 
+**Description:**
 Since fine-tuning a model using masks from another model as ground truth is not scientifically correct, an alternative approach was explored, analyzing **heterogeneity**. Some cells may continue growing rapidly while others slow down or stop.
 
 Each chamber (both reference and treated) is divided into 3 horizontal patches, and the area of each region is measured over time. Growth rates are computed for every patch, and the patch with the highest average growth is labeled as the **hotspot**. The hotspot growth curve is then compared with the **background** (average of the remaining patches).
@@ -123,6 +126,7 @@ The notebook also downloads the SAM2 checkpoint (`sam2.1_hiera_large.pt`) automa
 **How to run:**
 This notebook was run on a GPU T4 runtime and requires GPU. There are examples demonstrating how the method works on a single chamber, followed by the full analysis on all positions in the "All Positions Analysis" section. Unfortunately, to run the analysis you need to change the `tiff_dir` folder path for each chamber manually. The results for all different positions are saved as CSV files in a Google Drive folder defined by `BASE_DIR` (e.g., `/content/drive/MyDrive/POSITION_RESULTS`). These CSV files are required for computing the evaluation metrics in Method 1 and Method 2. Be careful with how these paths are used and where you want to save the results.
 
+**Description:**
 Another approach was to use a model suitable for video tracking with inference only (no training on the dataset). **SAM2** is used for segmentation and mask propagation, where each cell is given an initial mask and SAM2 propagates it across all frames. From these masks, single-cell area curves and growth rates are computed.
 
 Two detection methods are considered:

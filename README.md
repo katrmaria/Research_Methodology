@@ -1,10 +1,10 @@
 # Experimentation Overview
 
-The following notebooks implement different approaches for early detection of antibiotic effects on bacterial growth.
+This repository contains notebooks exploring image analysis methods for tuberculosis susceptibility testing, aiming to reduce detection time and identify spatial heterogeneity in drug response.
 
 ## General Notes
 
-All experiments are provided as Jupyter notebooks (.ipynb) that can be run directly in Google Colab using the badges provided, or locally with the listed requirements. There are markdown cells with interpretation and explanation as the notebooks can be a bit hard to follow. The results of the notebooks are not saved but printed in the cells, except for the Early Detection notebook where CSV files for all chambers need to be saved in the same folder. Some experiments need a lot of time to run, and GPU is recommended for SAM and SAM2.
+All experiments are Jupyter notebooks that can be run in Google Colab (using the badges) or locally. Markdown cells provide interpretation. GPU is recommended for SAM and SAM2 notebooks.
 
 ## Data
 
@@ -16,10 +16,17 @@ The data used in this analysis are saved in Google Drive in the following folder
 | REF_masks101_110 | [Google Drive](https://drive.google.com/drive/folders/1aT16Qkiu2Ox5Kxpi_J7cbFHYA7-MdSae?usp=sharing) |
 | RIF10_raw_data201_210 | [Google Drive](https://drive.google.com/drive/folders/1DBQTIAWk-kVcViBWLZh1PCyS-eINlRFA?usp=sharing) |
 | RIF10_masks201_210 | [Google Drive](https://drive.google.com/drive/folders/16_taCxRsJeBeEP7VeIc1Sz-1MnO1X5xD?usp=sharing) |
+| REF_raw_data111_117 (test) | [Google Drive](https://drive.google.com/drive/folders/1ntbYqdowhUJHSm-8_8ZYwKHrxIF_b0BU?usp=drive_link) |
+| REF_masks111_117 (test) | [Google Drive](https://drive.google.com/drive/folders/1Jyvr8UBiC6D-5M2FVllXQfmmwh1-8NOH?usp=sharing) |
+| RIF10_raw_data211_217 (test) | [Google Drive](https://drive.google.com/drive/folders/1omelouYiyPCpnAUu8uSViEVbUE-5u005?usp=drive_link) |
+| RIF10_masks211_217 (test) | [Google Drive](https://drive.google.com/drive/folders/1BxW-EnS9EnXMMJ4SVu_JZB5hz5ALpKdJ?usp=drive_link) |
+| Heterogeneity data (25cb5663) | [Google Drive](https://drive.google.com/drive/folders/1_d8E5hrSFSJllJttjImLM-c1Dj305Ut8?usp=sharing) |
 
-## Tran_methodology.ipynb (Baseline)
+## Tran et al. Methodology (Baseline)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2j8_W0sJJlRBLsPECPZ2b-EqCgrZvam?usp=sharing)
+Tran et al. methodology computes bacterial cell areas from Omnipose segmentation masks by counting non-zero pixels. Total area per chamber is tracked over time, and growth rates are extracted by fitting a rolling-window exponential model *A(t) = a·e^(bt)* to the area curves. Growth rate curves are normalized by dividing by the mean growth rate of the reference condition. 
+
+A new addition is the computation of the **detection time**, defined as the earliest time point at which treated bacteria differ significantly from untreated controls (Welch t-test, p < 0.05).
 
 **Requirements:**
 ```
@@ -30,26 +37,33 @@ scipy
 torch
 ```
 
-**How to run:**
-This notebook is a recreation of the baseline figures. There is no need for GPU, it can be run locally. Replace the paths of the masks `ref_dir` and `treat_dir` with the location of your data folders (REF_masks101_110 and RIF10_masks201_210), then run all cells sequentially.
+### Tran_methodology.ipynb
 
-**Description:**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1C2j8_W0sJJlRBLsPECPZ2b-EqCgrZvam?usp=sharing)
 
-As a baseline, `Tran_methodology.ipynb` includes all the functions from `EXP-23-BZ3167.ipynb` for:
-- Processing Omnipose segmentation masks and computing bacterial areas
-- Fitting a rolling-window exponential model *A(t) = a·e^(bt)* to extract growth rates
-- Generating figures (area curves, growth-rate curves, normalized plots)
-- Computing the **detection time**, the earliest point where treatment diverges from reference
+**Data used:** REF_masks101_110, RIF10_masks201_210
 
-These functions will be reused throughout the experimentation for area/growth-rate computation and figure generation.
+**How to run:** There is no need for GPU, it can be run locally. Replace the paths of the masks `ref_dir` and `treat_dir` with the location of your data folders (REF_masks101_110 and RIF10_masks201_210), then run all cells sequentially.
+
+Recreation of the baseline figures using positions 101-110 (reference) and 201-210 (treated). Includes functions for processing masks, computing areas/growth rates, generating figures, and computing detection time. These functions are reused throughout other experiments.
 
 ![Tran Methodology Results](figures/tran_figure.png)
 
-The figure shows the normalized growth rate of treated versus untreated conditions. The detection time *T* is the earliest time point at which treated and untreated growth rates differ significantly (Welch t-test, p < 0.05).
+### testing_Tran_methodology.ipynb
 
-## Finetuning_Sam_experiments.ipynb
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1cgGIGjeONbmQifFytEKhxNo65GIeVUpQ?usp=sharing)
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ZZ2NPX5iHTRP6cnBVBNm_N9xf8fH032x?usp=sharing)
+**Data used:** REF_masks111_117 (test), RIF10_masks211_217 (test)
+
+**How to run:** There is no need for GPU, it can be run locally. Replace the paths of the masks `ref_dir` and `treat_dir` with the location of your test data folders (REF_masks111_117 and RIF10_masks211_217), then run all cells sequentially.
+
+Applies the baseline methodology to the independent test set (positions 111-117 and 211-217). Also computes **segmentation quality metrics**: coefficient of variation (CV) measuring variability across positions, and temporal noise measuring frame-to-frame fluctuations.
+
+![Omnipose Normalized Growth Rate](figures/omnipose_norm_growth_rate.png)
+
+## SAM Fine-tuning for Improved Segmentation
+
+The **SAM model** is fine-tuned using LoRA to improve cell segmentation and reduce noise in area-based growth measurements. The best configuration was **LoRA rank 32**, achieving Dice = 0.9275, IoU = 0.8649, Precision = 0.9113, Recall = 0.9443, F1 = 0.9275 on the validation set.
 
 **Requirements:**
 ```
@@ -66,20 +80,43 @@ scikit-learn
 loralib
 ```
 
-**How to run:**
-This notebook was run on a GPU T4 runtime and requires GPU for training. Everything is mounted on Google Drive, so model weights will be saved there. Replace the paths for raw images and masks (`ref_raw`, `ref_mask`, `rif_raw`, `rif_mask`) with the location of your data folders (REF_raw_data101_110, REF_masks101_110, RIF10_raw_data201_210, RIF10_masks201_210). Run the code sequentially to set up the appropriate formats for the dataset, the model, and the training/evaluation functions. The experimentation starts in the "Experiments" section where you can run the examples or change the configurations (e.g., `exp_name`, `batch_size`, `num_epochs`, `learning_rate`, `lora_rank`, etc.). For any changes, make sure to update the paths accordingly.
+### Finetuning_Sam_experiments.ipynb
 
-**Description:**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ZZ2NPX5iHTRP6cnBVBNm_N9xf8fH032x?usp=sharing)
 
-The initial research question focused on whether **improving cell segmentation** could reduce noise in area-based growth measurements and, as a result, enable earlier detection of antibiotic effects.
+**Data used:** REF_raw_data101_110, REF_masks101_110, RIF10_raw_data201_210, RIF10_masks201_210
 
-For this purpose, the **general SAM model** is fine-tuned using LoRA with different configurations. The dataset is split into train, validation, and test sets. The best configuration was **LoRA rank 32**, achieving Dice = 0.9275, IoU = 0.8649, Precision = 0.9113, Recall = 0.9443, F1 = 0.9275.
+**How to run:** Requires GPU (tested on T4). Replace the paths for raw images and masks (`ref_raw`, `ref_mask`, `rif_raw`, `rif_mask`) with your data folders. Run sequentially to set up dataset, model, and training functions. Experimentation starts in the "Experiments" section where you can change configurations (e.g., `exp_name`, `batch_size`, `num_epochs`, `learning_rate`, `lora_rank`).
 
-However, the fine-tuned model must be evaluated on an unseen test dataset to generate figures and compute the detection time, allowing comparison with the baseline Omnipose model.
+Training notebook for fine-tuning SAM with LoRA. The dataset is split into train, validation, and test sets. Model weights are saved to Google Drive.
 
-## Heterogeneity_analysis.ipynb
+### testing_SAM.ipynb
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1HLfq0pOjPSCWUN7Q2OXvBF97lKkHtnoc?usp=sharing)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/1DZnpLCbiRSO0OlgutsX0DtqvwsmGN764/view?usp=drive_link)
+
+**Data used:** REF_raw_data111_117 (test), REF_masks111_117 (test), RIF10_raw_data211_217 (test), RIF10_masks211_217 (test)
+
+**How to run:** Requires GPU. Load the best checkpoint (`tb_sam.pth`) and replace the test data paths. The notebook evaluates the model and saves predicted masks to `SAM_preds/` folders.
+
+Evaluates the best SAM model (LoRA rank 32) on the test set (positions 111-117 and 211-217). Test set performance: Dice = 0.8919, IoU = 0.8049. The trained model generates segmentation masks for subsequent figure creation. The best model is available on [Google Drive](https://drive.google.com/file/d/1kiCAM84ae75DxRlGof7iYZryYXro0HmH/view?usp=sharing).
+
+### testing_SAM_figures.ipynb
+
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/15Oj1EGcGtSAljqhQP38HO-qffP_qd2kC/view?usp=drive_link)
+
+**Data used:** SAM-generated masks from testing_SAM.ipynb
+
+**How to run:** No GPU required. 
+
+Generates growth rate figures and computes detection time using SAM-generated masks. Applies the same analysis pipeline as Tran et al. to enable comparison. Detection time: T* = 0.67 hours. Segmentation quality metrics: CV = 0.1494, temporal noise = 0.0072.
+
+![SAM Normalized Growth Rate](figures/sam_norm_growth_rate.png)
+
+## Heterogeneity Analysis
+
+Under antibiotic exposure, some cells may continue growing rapidly while others slow down or stop. When growth is measured only at the population-averaged level, this variability can be hidden, allowing a small resistant subpopulation to remain undetected.
+
+Each chamber is divided into 3 horizontal patches, and the area of each region is measured over time. Growth rates are computed for every patch, and the patch with the highest average growth is labeled as the **hotspot**. The hotspot growth curve is then compared with the **background** (average of the remaining patches).
 
 **Requirements:**
 ```
@@ -90,26 +127,24 @@ scipy
 torch
 tqdm
 Pillow
+scikit-image
 ```
 
-**How to run:**
-There is no need for GPU, it can be run locally. There is an example demonstrating how the approach works on one chamber, and then the method is extended to all chambers in the "Actual Analysis" section. Make sure that the paths of the masks `ref_dir` and `treat_dir` are correct (REF_masks101_110 and RIF10_masks201_210), then run all cells sequentially.
+### Heterogeneity_methodology.ipynb
 
-**Description:**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://drive.google.com/file/d/1qMW6aFp3mCnZCEZSwcRMibNlUR3PoHUl/view?usp=sharing)
 
-Since fine-tuning a model using masks from another model as ground truth is not scientifically correct, an alternative approach was explored, analyzing **heterogeneity**. Some cells may continue growing rapidly while others slow down or stop.
+**Data used:** [Heterogeneity data (25cb5663)](https://drive.google.com/drive/folders/1_d8E5hrSFSJllJttjImLM-c1Dj305Ut8?usp=sharing)
 
-Each chamber (both reference and treated) is divided into 3 horizontal patches, and the area of each region is measured over time. Growth rates are computed for every patch, and the patch with the highest average growth is labeled as the **hotspot**. The hotspot growth curve is then compared with the **background** (average of the remaining patches).
+**How to run:** No GPU required. Replace the paths `ref_dir` and `treat_dir` with your data folders, then run all cells sequentially.
 
-![Heterogeneity Results](figures/heterogeneity_result.png)
+Includes step-by-step analysis on chamber 101, then extends to all chambers in the "Actual Analysis" section. Provides visualization of patch boundaries, hotspot assignments, and normalized growth-rate plots.
 
-The results in the figure are not very clear as the dataset used does not exhibit strong heterogeneity. However, visual inspection added in the notebook shows that the algorithm finds logical regions that appear to grow faster than the other patches.
+![Heterogeneity Results](figures/download%20(53).png)
 
-## Early_detection_Sam2.ipynb
+## SAM2 Single-Cell Tracking
 
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oVrnIiyG9pM2qB_8aTZ564i5DaDEzdGT?usp=sharing)
-
-**Note**: This notebook is too large to be displayed on GitHub. Please use the Colab link above to view it.
+**SAM2** is a foundation model for video segmentation that tracks objects across frames given an initial prompt. It was used for single-cell tracking on positions 101–109 (reference) and 201–209 (treated), with inference only (no training). Omnipose masks from the first frame provided initial prompts, and SAM2 propagated each cell across all frames. Single-cell areas were computed, growth rates estimated using sliding-window exponential fitting, then averaged per chamber. Statistical significance (p < 0.05) was required for three consecutive frames to reduce false detections.
 
 **Requirements:**
 ```
@@ -124,23 +159,15 @@ pandas
 sam2 (git+https://github.com/facebookresearch/sam2.git)
 ```
 
-The notebook also downloads the SAM2 checkpoint (`sam2.1_hiera_large.pt`) automatically.
+### Early_detection_Sam2.ipynb
 
-**How to run:**
-This notebook was run on a GPU T4 runtime and requires GPU. There are examples demonstrating how the method works on a single chamber, followed by the full analysis on all positions in the "All Positions Analysis" section. Unfortunately, to run the analysis you need to change the `tiff_dir` folder path for each chamber manually (e.g., `tiff_dir = "/content/drive/MyDrive/REF_raw_data101_110/Pos101/aphase"`). The results for all different positions are saved as CSV files in a Google Drive folder defined by `BASE_DIR` (e.g., `/content/drive/MyDrive/POSITION_RESULTS`). These CSV files are required for computing the evaluation metrics in Method 1 and Method 2. Be careful with how these paths are used and where you want to save the results.
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1oVrnIiyG9pM2qB_8aTZ564i5DaDEzdGT?usp=sharing)
 
-**Description:**
+**Note**: This notebook is too large to be displayed on GitHub. Please use the Colab link above to view it.
 
-Another approach was to use a model suitable for video tracking with inference only (no training on the dataset). **SAM2** is used for segmentation and mask propagation, where each cell is given an initial mask and SAM2 propagates it across all frames. From these masks, single-cell area curves and growth rates are computed.
+**Data used:** REF_raw_data101_110, RIF10_raw_data201_210
 
-Two detection methods are considered:
-- **Method A (Chamber-Level Mean Growth)**: Growth rates are averaged across all cells in a chamber, then treated vs. reference curves are compared to find when they diverge. The same approach as Tran et al. for creating figures and computing detection time was applied.
-- **Method B (Single-Cell Distribution Analysis)**: The goal is to define a single-cell antibiotic response metric that detects drug effect earlier than the usual "total area per chamber" growth rate. This method uses the full distribution of single-cell growth rates with three detection signals:
-  - *M_cell(t)*: Separation metric comparing mean and std of growth rates between treated and control cells (values > 2 indicate clear separation)
-  - *f_slow(t)*: Fraction of cells with growth rate below the 10th percentile of control baseline
-  - Welch t-test p-value: Statistical test for significant difference between groups (p < 0.05)
+**How to run:** Requires GPU (tested on T4). Change the `tiff_dir` folder path for each chamber manually. Results are saved as CSV files in `BASE_DIR`.
 
-  To prevent false detections from noise, a signal is valid only if the condition holds for three consecutive frames.
-
-**Note**: SAM2's tracking results are unreliable (cells change size, disappear, or merge inconsistently). The Methods section is also not well validated. Results from this notebook should be interpreted with caution.
+**Note**: SAM2's tracking results are unreliable (cells change size, disappear, or merge). Results should be interpreted with caution.
 
